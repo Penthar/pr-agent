@@ -8,6 +8,7 @@ from enum import Enum
 from loguru import logger
 
 from pr_agent.config_loader import get_settings
+from splunk import SplunkHECSink
 
 
 class LoggingFormat(str, Enum):
@@ -57,6 +58,20 @@ def setup_logger(level: str = "INFO", fmt: LoggingFormat = LoggingFormat.CONSOLE
             format="{message}",
             colorize=False,
             serialize=True,
+        )
+
+    hec_url = os.getenv("SPLUNK_HEC_URL")
+    hec_token = os.getenv("SPLUNK_HEC_TOKEN")
+    analytics_enabled = os.getenv("ANALYTICS", "true").lower() not in ("0", "false", "no")
+
+    if analytics_enabled and hec_url and hec_token:
+        logger.add(
+            SplunkHECSink(hec_url, hec_token),
+            level=level,
+            filter=inv_analytics_filter,
+            enqueue=True,      # async, non-blocking
+            backtrace=False,
+            diagnose=False,
         )
 
     return logger
