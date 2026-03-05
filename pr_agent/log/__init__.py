@@ -8,7 +8,7 @@ from enum import Enum
 from loguru import logger
 
 from pr_agent.config_loader import get_settings
-from splunk import SplunkHECSink
+from .splunk import SplunkHECSink
 
 
 class LoggingFormat(str, Enum):
